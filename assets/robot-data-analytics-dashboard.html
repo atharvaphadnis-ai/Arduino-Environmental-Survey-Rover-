@@ -1,0 +1,1130 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#667eea">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Robot Analytics">
+  <title>Robot Data Analytics Dashboard</title>
+
+  <!-- Chart.js from CDN (client-side only) -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+
+  <!-- jsPDF from CDN (client-side PDF generation, no server credits) -->
+  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js"></script>
+
+  <style>
+    /* ============================================
+       Robot Data Analytics Dashboard - Stylesheet
+       Made by Atharva Phadnis
+       ============================================ */
+
+    /* --- Reset & Base --- */
+    *,
+    *::before,
+    *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: #f0f4f8;
+      color: #334155;
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    /* --- Header --- */
+    .header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: #fff;
+      text-align: center;
+      padding: 2.5rem 1rem 2rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .header::after {
+      content: '';
+      position: absolute;
+      bottom: -2px;
+      left: 0;
+      right: 0;
+      height: 40px;
+      background: #f0f4f8;
+      border-radius: 50% 50% 0 0 / 100% 100% 0 0;
+    }
+
+    .header h1 {
+      font-size: 2rem;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      margin-bottom: 0.25rem;
+    }
+
+    .header .subtitle {
+      font-size: 0.95rem;
+      opacity: 0.85;
+      font-weight: 400;
+    }
+
+    /* --- Container --- */
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 1.5rem 1rem 3rem;
+    }
+
+    /* --- Card --- */
+    .card {
+      background: #ffffff;
+      border-radius: 16px;
+      padding: 1.75rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06), 0 4px 12px rgba(0, 0, 0, 0.04);
+      transition: box-shadow 0.2s ease;
+    }
+
+    .card:hover {
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08), 0 8px 24px rgba(0, 0, 0, 0.06);
+    }
+
+    .card-title {
+      font-size: 1.15rem;
+      font-weight: 600;
+      color: #1e293b;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .card-title .icon {
+      font-size: 1.3rem;
+    }
+
+    /* --- Toolbar --- */
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      align-items: center;
+    }
+
+    .tool-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.6rem 1.1rem;
+      border: none;
+      border-radius: 10px;
+      font-size: 0.88rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      color: #fff;
+    }
+
+    .tool-btn:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+
+    .tool-btn.pdf-btn {
+      background: linear-gradient(135deg, #ef4444, #f97316);
+    }
+
+    .tool-btn.pdf-btn:not(:disabled):hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+    }
+
+    .tool-btn.app-btn {
+      background: linear-gradient(135deg, #667eea, #764ba2);
+    }
+
+    .tool-btn.app-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    }
+
+    .tool-btn.folder-btn {
+      background: linear-gradient(135deg, #10b981, #059669);
+    }
+
+    .tool-btn.folder-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+    }
+
+    .save-folder-status {
+      font-size: 0.82rem;
+      color: #059669;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+    }
+
+    .save-folder-status.hidden {
+      display: none;
+    }
+
+    /* --- Upload Section --- */
+    .upload-area {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .upload-box {
+      flex: 1;
+      min-width: 240px;
+      border: 2px dashed #cbd5e1;
+      border-radius: 12px;
+      padding: 2rem 1.5rem;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      position: relative;
+      background: #f8fafc;
+    }
+
+    .upload-box:hover {
+      border-color: #667eea;
+      background: #f0f0ff;
+    }
+
+    .upload-box.has-file {
+      border-color: #22c55e;
+      background: #f0fdf4;
+    }
+
+    .upload-box .upload-icon {
+      font-size: 2.5rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .upload-box .upload-label {
+      font-weight: 600;
+      color: #475569;
+      margin-bottom: 0.25rem;
+    }
+
+    .upload-box .upload-hint {
+      font-size: 0.82rem;
+      color: #94a3b8;
+    }
+
+    .upload-box .file-name {
+      margin-top: 0.75rem;
+      font-size: 0.85rem;
+      color: #22c55e;
+      font-weight: 600;
+    }
+
+    .upload-box input[type="file"] {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      cursor: pointer;
+    }
+
+    /* --- Toggle --- */
+    .toggle-bar {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .toggle-btn {
+      padding: 0.55rem 1.25rem;
+      border: 2px solid #e2e8f0;
+      border-radius: 10px;
+      background: #fff;
+      color: #64748b;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .toggle-btn:hover {
+      border-color: #667eea;
+      color: #667eea;
+    }
+
+    .toggle-btn.active {
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: #fff;
+      border-color: transparent;
+    }
+
+    /* --- Chart Container --- */
+    .chart-wrapper {
+      position: relative;
+      width: 100%;
+      max-height: 380px;
+    }
+
+    .chart-wrapper canvas {
+      width: 100% !important;
+      max-height: 380px;
+    }
+
+    /* --- Insights Grid --- */
+    .insights-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+    }
+
+    .insight-card {
+      background: #f8fafc;
+      border-radius: 12px;
+      padding: 1.25rem;
+      text-align: center;
+      border: 1px solid #e2e8f0;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .insight-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+    }
+
+    .insight-card .insight-icon {
+      font-size: 2rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .insight-card .insight-value {
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: #1e293b;
+      margin-bottom: 0.15rem;
+    }
+
+    .insight-card .insight-label {
+      font-size: 0.82rem;
+      color: #64748b;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    /* Color accents for insight cards */
+    .insight-card.temp {
+      border-left: 4px solid #f97316;
+    }
+    .insight-card.gas {
+      border-left: 4px solid #3b82f6;
+    }
+    .insight-card.fire {
+      border-left: 4px solid #ef4444;
+    }
+    .insight-card.obstacle {
+      border-left: 4px solid #8b5cf6;
+    }
+
+    /* --- Comparison Badge --- */
+    .comparison-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.35rem 0.85rem;
+      background: #dbeafe;
+      color: #1d4ed8;
+      border-radius: 999px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+    }
+
+    /* --- Empty State --- */
+    .empty-state {
+      text-align: center;
+      padding: 3rem 1rem;
+      color: #94a3b8;
+    }
+
+    .empty-state .empty-icon {
+      font-size: 3rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .empty-state p {
+      font-size: 0.95rem;
+    }
+
+    /* --- Hidden --- */
+    .hidden {
+      display: none !important;
+    }
+
+    /* --- Footer --- */
+    .footer {
+      text-align: center;
+      padding: 1.5rem 1rem;
+      color: #94a3b8;
+      font-size: 0.82rem;
+    }
+
+    /* --- Responsive --- */
+    @media (max-width: 640px) {
+      .header h1 {
+        font-size: 1.5rem;
+      }
+
+      .card {
+        padding: 1.25rem;
+      }
+
+      .insights-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .toggle-btn {
+        padding: 0.45rem 0.9rem;
+        font-size: 0.82rem;
+      }
+
+      .tool-btn {
+        padding: 0.5rem 0.9rem;
+        font-size: 0.82rem;
+      }
+    }
+
+    @media (max-width: 400px) {
+      .insights-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+<link rel="manifest" href="blob:https://preview-sandbox--6a49e37c3c2285725a1f4889.base44.app/fc2b3369-d559-40c0-a4f2-09e448cc3cfc"></head>
+<body>
+
+  <!-- ======== Header ======== -->
+  <header class="header">
+    <h1>🤖 Robot Data Analytics Dashboard</h1>
+    <p class="subtitle">Made by Atharva Phadnis</p>
+  </header>
+
+  <div class="container">
+
+    <!-- ======== Toolbar ======== -->
+    <div class="card">
+      <div class="card-title">
+        <span class="icon">🛠️</span> Tools &amp; Export
+      </div>
+      <div class="toolbar">
+        <!-- Export PDF Report -->
+        <button class="tool-btn pdf-btn" id="export-pdf-btn" disabled="">
+          📄 Export PDF Report
+        </button>
+
+        <!-- Download Standalone App -->
+        <button class="tool-btn app-btn" id="download-app-btn">
+          📥 Download App
+        </button>
+
+        <!-- Set Save Folder -->
+        <button class="tool-btn folder-btn" id="set-folder-btn">
+          📁 Set Save Folder
+        </button>
+
+        <!-- Save folder status (shown after folder is chosen) -->
+        <span class="save-folder-status hidden" id="save-folder-status"></span>
+      </div>
+    </div>
+
+    <!-- ======== Upload Section ======== -->
+    <div class="card">
+      <div class="card-title">
+        <span class="icon">📂</span> Upload CSV Files
+      </div>
+      <div class="upload-area">
+
+        <!-- File 1 Upload Box -->
+        <div class="upload-box" id="file1-box">
+          <div class="upload-icon">📄</div>
+          <div class="upload-label">File 1 — Today's Data</div>
+          <div class="upload-hint">Click or drag a .csv file here</div>
+          <div class="file-name hidden" id="file1-name"></div>
+          <input type="file" id="file1-input" accept=".csv">
+        </div>
+
+        <!-- File 2 Upload Box (optional, for comparison) -->
+        <div class="upload-box" id="file2-box">
+          <div class="upload-icon">📄</div>
+          <div class="upload-label">File 2 — Yesterday's Data</div>
+          <div class="upload-hint">Optional — for comparison mode</div>
+          <div class="file-name hidden" id="file2-name"></div>
+          <input type="file" id="file2-input" accept=".csv">
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ======== Empty State (shown before any upload) ======== -->
+    <div class="card" id="empty-state">
+      <div class="empty-state">
+        <div class="empty-icon">📊</div>
+        <p>Upload a CSV file to see your robot's sensor data visualized here.</p>
+      </div>
+    </div>
+
+    <!-- ======== Chart Section (hidden until data is loaded) ======== -->
+    <div class="card hidden" id="chart-section">
+      <div class="card-title">
+        <span class="icon">📈</span> Sensor Data Visualization
+      </div>
+
+      <!-- Comparison badge (shown only when 2 files loaded) -->
+      <div class="comparison-badge hidden" id="comparison-badge">
+        ⚡ Comparison Mode — Today vs Yesterday
+      </div>
+
+      <!-- Toggle between Temperature and Gas -->
+      <div class="toggle-bar">
+        <button class="toggle-btn active" id="toggle-temp">🌡️ Temperature</button>
+        <button class="toggle-btn" id="toggle-gas">💨 Gas Level</button>
+      </div>
+
+      <!-- The chart canvas -->
+      <div class="chart-wrapper">
+        <canvas id="main-chart"></canvas>
+      </div>
+    </div>
+
+    <!-- ======== Insights Section (hidden until data is loaded) ======== -->
+    <div class="card hidden" id="insights-section">
+      <div class="card-title">
+        <span class="icon">🧠</span> Automatic Insights
+      </div>
+
+      <div class="insights-grid">
+
+        <div class="insight-card temp">
+          <div class="insight-icon">🌡️</div>
+          <div class="insight-value" id="insight-max-temp">—</div>
+          <div class="insight-label">Max Temperature</div>
+        </div>
+
+        <div class="insight-card gas">
+          <div class="insight-icon">💨</div>
+          <div class="insight-value" id="insight-avg-gas">—</div>
+          <div class="insight-label">Avg Gas Level</div>
+        </div>
+
+        <div class="insight-card fire">
+          <div class="insight-icon">🔥</div>
+          <div class="insight-value" id="insight-fire-count">—</div>
+          <div class="insight-label">Fire Detections</div>
+        </div>
+
+        <div class="insight-card obstacle">
+          <div class="insight-icon">🚧</div>
+          <div class="insight-value" id="insight-obstacle-count">—</div>
+          <div class="insight-label">Obstacle Detections</div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ======== Footer ======== -->
+  <footer class="footer">
+    Robot Data Analytics Dashboard · Made by Atharva Phadnis
+  </footer>
+
+  <script>
+    /* ============================================
+       Robot Data Analytics Dashboard - JavaScript
+       Made by Atharva Phadnis
+       ============================================ */
+
+    // ---- Global Variables ----
+
+    // Store parsed data from File 1 and File 2
+    var file1Data = null;
+    var file2Data = null;
+
+    // The Chart.js chart instance (so we can destroy & recreate it)
+    var chartInstance = null;
+
+    // Current view mode: "temp" or "gas"
+    var currentView = "temp";
+
+    // Directory handle for saving CSV files (File System Access API)
+    var saveDirectoryHandle = null;
+
+    // ---- DOM References ----
+
+    var file1Input = document.getElementById("file1-input");
+    var file2Input = document.getElementById("file2-input");
+    var file1Name = document.getElementById("file1-name");
+    var file2Name = document.getElementById("file2-name");
+    var file1Box = document.getElementById("file1-box");
+    var file2Box = document.getElementById("file2-box");
+
+    var chartSection = document.getElementById("chart-section");
+    var insightsSection = document.getElementById("insights-section");
+    var emptyState = document.getElementById("empty-state");
+
+    var toggleTemp = document.getElementById("toggle-temp");
+    var toggleGas = document.getElementById("toggle-gas");
+    var comparisonBadge = document.getElementById("comparison-badge");
+
+    var insightMaxTemp = document.getElementById("insight-max-temp");
+    var insightAvgGas = document.getElementById("insight-avg-gas");
+    var insightFireCount = document.getElementById("insight-fire-count");
+    var insightObstacleCount = document.getElementById("insight-obstacle-count");
+
+    // Toolbar buttons
+    var exportPdfBtn = document.getElementById("export-pdf-btn");
+    var downloadAppBtn = document.getElementById("download-app-btn");
+    var setFolderBtn = document.getElementById("set-folder-btn");
+    var saveFolderStatus = document.getElementById("save-folder-status");
+
+    // ---- PWA Setup (manifest injected via Blob, no server needed) ----
+
+    (function setupPWA() {
+      try {
+        var manifest = {
+          name: "Robot Data Analytics Dashboard",
+          short_name: "Robot Analytics",
+          start_url: ".",
+          display: "standalone",
+          background_color: "#f0f4f8",
+          theme_color: "#667eea"
+        };
+        var blob = new Blob([JSON.stringify(manifest)], { type: "application/manifest+json" });
+        var link = document.createElement("link");
+        link.rel = "manifest";
+        link.href = URL.createObjectURL(blob);
+        document.head.appendChild(link);
+      } catch (e) {
+        // PWA manifest not critical — ignore errors
+      }
+    })();
+
+    // ---- Event Listeners ----
+
+    // When the user selects File 1
+    file1Input.addEventListener("change", function (e) {
+      var file = e.target.files[0];
+      if (!file) return;
+
+      // Show the file name in the upload box
+      file1Name.textContent = "✅ " + file.name;
+      file1Name.classList.remove("hidden");
+      file1Box.classList.add("has-file");
+
+      // Save the uploaded CSV to the chosen folder (or download as fallback)
+      saveCSVFile(file);
+
+      // Read and parse the CSV file
+      readCSVFile(file, function (data) {
+        file1Data = data;
+        updateDashboard();
+      });
+    });
+
+    // When the user selects File 2 (optional, for comparison)
+    file2Input.addEventListener("change", function (e) {
+      var file = e.target.files[0];
+      if (!file) return;
+
+      file2Name.textContent = "✅ " + file.name;
+      file2Name.classList.remove("hidden");
+      file2Box.classList.add("has-file");
+
+      // Save the uploaded CSV to the chosen folder (or download as fallback)
+      saveCSVFile(file);
+
+      readCSVFile(file, function (data) {
+        file2Data = data;
+        updateDashboard();
+      });
+    });
+
+    // Toggle button: Temperature view
+    toggleTemp.addEventListener("click", function () {
+      currentView = "temp";
+      toggleTemp.classList.add("active");
+      toggleGas.classList.remove("active");
+      updateChart();
+    });
+
+    // Toggle button: Gas view
+    toggleGas.addEventListener("click", function () {
+      currentView = "gas";
+      toggleGas.classList.add("active");
+      toggleTemp.classList.remove("active");
+      updateChart();
+    });
+
+    // Export PDF Report button
+    exportPdfBtn.addEventListener("click", exportPDF);
+
+    // Download App button
+    downloadAppBtn.addEventListener("click", downloadApp);
+
+    // Set Save Folder button
+    setFolderBtn.addEventListener("click", setSaveFolder);
+
+    // ---- CSV Parsing ----
+
+    /**
+     * Reads a CSV file and parses it into an array of objects.
+     * Expected CSV format: Time,Temp,Gas,Obstacle,Fire
+     */
+    function readCSVFile(file, callback) {
+      var reader = new FileReader();
+
+      reader.onload = function (e) {
+        var text = e.target.result;
+        var lines = text.trim().split("\n");
+
+        // The first line is the header (Time,Temp,Gas,Obstacle,Fire)
+        // We skip it and start from index 1
+        var data = [];
+
+        for (var i = 1; i < lines.length; i++) {
+          var columns = lines[i].split(",");
+
+          // Make sure the line has enough columns
+          if (columns.length >= 5) {
+            data.push({
+              time: columns[0].trim(),
+              temp: parseFloat(columns[1].trim()) || 0,
+              gas: parseFloat(columns[2].trim()) || 0,
+              obstacle: parseInt(columns[3].trim()) || 0,
+              fire: parseInt(columns[4].trim()) || 0
+            });
+          }
+        }
+
+        callback(data);
+      };
+
+      reader.readAsText(file);
+    }
+
+    // ---- Dashboard Update ----
+
+    /**
+     * Called whenever new data is loaded.
+     * Shows/hides sections and updates both chart and insights.
+     */
+    function updateDashboard() {
+      if (!file1Data) {
+        emptyState.classList.remove("hidden");
+        chartSection.classList.add("hidden");
+        insightsSection.classList.add("hidden");
+        exportPdfBtn.disabled = true;
+        return;
+      }
+
+      emptyState.classList.add("hidden");
+      chartSection.classList.remove("hidden");
+      insightsSection.classList.remove("hidden");
+      exportPdfBtn.disabled = false; // Enable PDF export now that we have data
+
+      // Show comparison badge if two files are loaded
+      if (file2Data) {
+        comparisonBadge.classList.remove("hidden");
+      } else {
+        comparisonBadge.classList.add("hidden");
+      }
+
+      updateChart();
+      updateInsights();
+    }
+
+    // ---- Chart Rendering ----
+
+    /**
+     * Builds and renders the Chart.js line chart.
+     * Shows Temperature or Gas based on currentView.
+     * If two files are loaded, overlays both datasets.
+     */
+    function updateChart() {
+      if (!file1Data) return;
+
+      // Destroy the old chart if it exists (prevents stacking)
+      if (chartInstance) {
+        chartInstance.destroy();
+      }
+
+      var canvas = document.getElementById("main-chart");
+      var ctx = canvas.getContext("2d");
+
+      // Decide which data field to show
+      var field = currentView === "temp" ? "temp" : "gas";
+      var label = currentView === "temp" ? "Temperature (°C)" : "Gas Level";
+      var color1 = currentView === "temp" ? "#f97316" : "#3b82f6";
+      var color2 = currentView === "temp" ? "#fb923c" : "#60a5fa";
+
+      // X-axis labels come from File 1's time values
+      var labels = file1Data.map(function (row) {
+        return row.time;
+      });
+
+      // File 1 dataset
+      var dataset1Values = file1Data.map(function (row) {
+        return row[field];
+      });
+
+      // Build the datasets array
+      var datasets = [
+        {
+          label: file2Data ? "Today — " + label : label,
+          data: dataset1Values,
+          borderColor: color1,
+          backgroundColor: color1 + "1A",
+          borderWidth: 2.5,
+          pointRadius: 3,
+          pointHoverRadius: 6,
+          pointBackgroundColor: color1,
+          fill: true,
+          tension: 0.35
+        }
+      ];
+
+      // If File 2 is loaded, add a second dataset for comparison
+      if (file2Data) {
+        var dataset2Values = file2Data.map(function (row) {
+          return row[field];
+        });
+
+        datasets.push({
+          label: "Yesterday — " + label,
+          data: dataset2Values,
+          borderColor: color2,
+          backgroundColor: color2 + "1A",
+          borderWidth: 2,
+          borderDash: [6, 3],
+          pointRadius: 2,
+          pointHoverRadius: 5,
+          pointBackgroundColor: color2,
+          fill: true,
+          tension: 0.35
+        });
+
+        // Use the longer array for labels
+        if (file2Data.length > file1Data.length) {
+          for (var i = labels.length; i < file2Data.length; i++) {
+            labels.push(file2Data[i].time);
+          }
+        }
+      }
+
+      // Create the new chart
+      chartInstance = new Chart(ctx, {
+        type: "line",
+        data: {
+          labels: labels,
+          datasets: datasets
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          interaction: {
+            mode: "index",
+            intersect: false
+          },
+          plugins: {
+            legend: {
+              display: true,
+              position: "top",
+              labels: {
+                usePointStyle: true,
+                padding: 16,
+                font: { size: 13, weight: "500" }
+              }
+            },
+            tooltip: {
+              backgroundColor: "#1e293b",
+              titleFont: { size: 13 },
+              bodyFont: { size: 12 },
+              padding: 10,
+              cornerRadius: 8
+            }
+          },
+          scales: {
+            x: {
+              grid: { display: false },
+              ticks: {
+                color: "#94a3b8",
+                font: { size: 11 },
+                maxRotation: 45
+              }
+            },
+            y: {
+              grid: { color: "#f1f5f9" },
+              ticks: {
+                color: "#94a3b8",
+                font: { size: 11 }
+              }
+            }
+          }
+        }
+      });
+    }
+
+    // ---- Insights Calculation ----
+
+    /**
+     * Calculates insights from File 1 data and displays them.
+     */
+    function updateInsights() {
+      if (!file1Data) return;
+
+      // Max Temperature
+      var maxTemp = -Infinity;
+      for (var i = 0; i < file1Data.length; i++) {
+        if (file1Data[i].temp > maxTemp) {
+          maxTemp = file1Data[i].temp;
+        }
+      }
+
+      // Average Gas Level
+      var totalGas = 0;
+      for (var j = 0; j < file1Data.length; j++) {
+        totalGas += file1Data[j].gas;
+      }
+      var avgGas = totalGas / file1Data.length;
+
+      // Fire Detection Count
+      var fireCount = 0;
+      for (var k = 0; k < file1Data.length; k++) {
+        if (file1Data[k].fire === 1) {
+          fireCount++;
+        }
+      }
+
+      // Obstacle Detection Count
+      var obstacleCount = 0;
+      for (var m = 0; m < file1Data.length; m++) {
+        if (file1Data[m].obstacle === 1) {
+          obstacleCount++;
+        }
+      }
+
+      insightMaxTemp.textContent = maxTemp.toFixed(1) + "°C";
+      insightAvgGas.textContent = avgGas.toFixed(1);
+      insightFireCount.textContent = fireCount;
+      insightObstacleCount.textContent = obstacleCount;
+    }
+
+    // ============================================
+    // PDF EXPORT (jsPDF — 100% client-side, no credits)
+    // ============================================
+
+    /**
+     * Generates a PDF report containing the chart image and insights.
+     * Uses jsPDF (loaded from CDN) and Chart.js toBase64Image().
+     */
+    function exportPDF() {
+      if (!file1Data) {
+        alert("Please upload a CSV file first to generate a report.");
+        return;
+      }
+
+      var jsPDF = window.jspdf.jsPDF;
+      var doc = new jsPDF();
+
+      // --- Header bar ---
+      doc.setFillColor(102, 126, 234);
+      doc.rect(0, 0, 210, 35, "F");
+      doc.setTextColor(255, 255, 255);
+      doc.setFontSize(20);
+      doc.text("Robot Data Analytics Report", 20, 18);
+      doc.setFontSize(10);
+      doc.text("Made by Atharva Phadnis", 20, 26);
+      doc.text("Generated: " + new Date().toLocaleString(), 20, 32);
+
+      var y = 48;
+
+      // --- Chart image ---
+      if (chartInstance) {
+        doc.setTextColor(30, 41, 59);
+        doc.setFontSize(14);
+        var chartTitle = currentView === "temp" ? "Temperature Graph" : "Gas Level Graph";
+        if (file2Data) {
+          chartTitle += " (Today vs Yesterday)";
+        }
+        doc.text(chartTitle, 20, y);
+        y += 6;
+
+        var imgData = chartInstance.toBase64Image();
+        doc.addImage(imgData, "PNG", 20, y, 170, 80);
+        y += 88;
+      }
+
+      // --- Insights section ---
+      doc.setFontSize(14);
+      doc.setTextColor(30, 41, 59);
+      doc.text("Insights Summary", 20, y);
+      y += 8;
+
+      // Draw insight cards
+      var labels = ["Max Temperature", "Average Gas Level", "Fire Detections", "Obstacle Detections"];
+      var values = [
+        insightMaxTemp.textContent,
+        insightAvgGas.textContent,
+        insightFireCount.textContent,
+        insightObstacleCount.textContent
+      ];
+      var colors = [[249, 115, 22], [59, 130, 246], [239, 68, 68], [139, 92, 246]];
+      var boxWidth = 82;
+      var boxHeight = 28;
+      var gap = 10;
+
+      for (var i = 0; i < 4; i++) {
+        var col = i % 2;
+        var row = Math.floor(i / 2);
+        var x = 20 + col * (boxWidth + gap);
+        var by = y + row * (boxHeight + gap);
+
+        // Card background
+        doc.setFillColor(248, 250, 252);
+        doc.setDrawColor(226, 232, 240);
+        doc.roundedRect(x, by, boxWidth, boxHeight, 3, 3, "FD");
+
+        // Colored left border
+        doc.setFillColor(colors[i][0], colors[i][1], colors[i][2]);
+        doc.rect(x, by, 2, boxHeight, "F");
+
+        // Label
+        doc.setFontSize(9);
+        doc.setTextColor(100, 116, 139);
+        doc.text(labels[i], x + 6, by + 11);
+
+        // Value
+        doc.setFontSize(15);
+        doc.setTextColor(30, 41, 59);
+        doc.text(values[i], x + 6, by + 21);
+      }
+
+      // --- Footer ---
+      doc.setFontSize(8);
+      doc.setTextColor(148, 163, 184);
+      doc.text("Robot Data Analytics Dashboard - Made by Atharva Phadnis", 20, 288);
+
+      // Save the PDF
+      doc.save("robot-analytics-report.pdf");
+    }
+
+    // ============================================
+    // DOWNLOAD APP (standalone HTML — no credits)
+    // ============================================
+
+    /**
+     * Downloads the complete dashboard as a standalone .html file.
+     * The user can open it in any browser — no server needed.
+     * Includes a PWA manifest so it can be installed when hosted.
+     */
+    function downloadApp() {
+      // Capture the full HTML document source
+      var html = "<!DOCTYPE html>\n" + document.documentElement.outerHTML;
+      var blob = new Blob([html], { type: "text/html" });
+      var url = URL.createObjectURL(blob);
+
+      var a = document.createElement("a");
+      a.href = url;
+      a.download = "robot-data-analytics-dashboard.html";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+
+    // ============================================
+    // SAVE CSV TO FOLDER (File System Access API)
+    // No Base44 credits — pure browser API
+    // ============================================
+
+    /**
+     * Opens a folder picker so the user can choose where
+     * uploaded CSV files will be saved on their computer.
+     * Falls back gracefully on browsers without support.
+     */
+    async function setSaveFolder() {
+      // Check if the File System Access API is available
+      if (!window.showDirectoryPicker) {
+        alert(
+          "Your browser does not support folder selection.\n\n" +
+          "CSV files will be downloaded to your default Downloads folder instead.\n\n" +
+          "For folder selection, please use Chrome or Edge on desktop."
+        );
+        return;
+      }
+
+      try {
+        // Show the folder picker dialog
+        saveDirectoryHandle = await window.showDirectoryPicker();
+
+        // Update the UI to show the selected folder
+        saveFolderStatus.textContent = "📁 Saving to: " + saveDirectoryHandle.name;
+        saveFolderStatus.classList.remove("hidden");
+        setFolderBtn.textContent = "📁 Change Save Folder";
+      } catch (e) {
+        // User cancelled the picker — keep existing folder if one was set
+      }
+    }
+
+    /**
+     * Saves an uploaded CSV file.
+     * If a folder was chosen, saves it there.
+     * Otherwise, triggers a regular browser download.
+     */
+    function saveCSVFile(file) {
+      if (saveDirectoryHandle) {
+        saveCSVToFolder(file);
+      } else {
+        downloadCSVFile(file);
+      }
+    }
+
+    /**
+     * Saves a file to the chosen folder using the File System Access API.
+     */
+    async function saveCSVToFolder(file) {
+      try {
+        // Create (or open) a file with the same name inside the chosen folder
+        var fileHandle = await saveDirectoryHandle.getFileHandle(file.name, { create: true });
+        var writable = await fileHandle.createWritable();
+        // Write the original file contents directly
+        await writable.write(file);
+        await writable.close();
+      } catch (e) {
+        // If folder save fails (e.g. permission revoked), fall back to download
+        downloadCSVFile(file);
+      }
+    }
+
+    /**
+     * Fallback: triggers a regular browser download of the CSV file.
+     * Used when no folder is chosen or the browser lacks folder support.
+     */
+    function downloadCSVFile(file) {
+      var url = URL.createObjectURL(file);
+      var a = document.createElement("a");
+      a.href = url;
+      a.download = file.name;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+  </script>
+
+
+
+</body></html>
