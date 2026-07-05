@@ -1,4 +1,5 @@
-<img width="807" height="450" alt="image" src="https://github.com/user-attachments/assets/f9d3e769-16cb-4471-aeaa-a3d0955d4b14" />
+<img width="807" height="450" alt="image" src="https://github.com/user-attachments/assets/a66eb722-2b42-4e31-906b-20d7f55b3dce" />
+
 PROJECT: AUTONOMOUS ENVIRONMENTAL SURVEY ROVER (AESR)<br>
 Designed & Fabricated by: Atharva Phadnis<br>
 Class: 8C<br>
