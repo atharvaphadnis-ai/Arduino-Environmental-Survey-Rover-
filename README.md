@@ -1,3 +1,4 @@
+<img width="807" height="450" alt="image" src="https://github.com/user-attachments/assets/f9d3e769-16cb-4471-aeaa-a3d0955d4b14" />
 PROJECT: AUTONOMOUS ENVIRONMENTAL SURVEY ROVER (AESR)<br>
 Designed & Fabricated by: Atharva Phadnis<br>
 Class: 8C<br>
@@ -7,6 +8,8 @@ School: Vimala Kulkarni Memorial School<br>
 ================================================================================<br>
 CORE OBJECTIVE<br>
 ================================================================================<br>
+
+
 To build a fully functional, semi-autonomous differential-drive rover that captures hyper-local environmental data (temperature and relative humidity) in real time. The robot displays the readings instantly on an onboard OLED screen, logs every data point with a timestamp onto a microSD card, and actively avoids obstacles using infrared sensors.<br>
 <br>
 The true innovation lies in the companion analytics dashboard — a custom application that reads the logged CSV files, compares today's temperature profile with yesterday's, and renders a clear comparative line chart. This empowers Atharva to study daily weather patterns, microclimate shifts, and thermal behaviour in his immediate environment.<br>
