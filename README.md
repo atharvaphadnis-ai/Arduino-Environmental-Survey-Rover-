@@ -122,6 +122,11 @@ The embedded C++ firmware is structured for reliability and speed. Here is the e
 ================================================================================<br>
 THE COMPANION APP – ROBOT DATA ANALYTICS DASHBOARD<br>
 ================================================================================<br>
+<img width="1366" height="768" alt="image" src="https://github.com/user-attachments/assets/3aeabe16-9b77-4603-96ae-17f4431e7cbd" />
+
+
+
+
 To transform the raw CSV logs into meaningful insights, Atharva built a dedicated post-processing application (using Python with Pandas/Matplotlib or MIT App Inventor). This dashboard is the bridge between the rover's hardware and the user's understanding of the environment.<br>
 <br>
 [IMAGE: Robot Data Analytics Dashboard – showing Temp: 24C, Flame: ON, Export PDF Report, Upload CSV Files, File 1 – Today's Data, and File 2 – Yesterday's Data (optional)]<br>
@@ -170,6 +175,6 @@ The integration of the cross-platform comparative dashboard elevates this projec
 <br>
 --------------------------------------------------------------------------------<br>
 Project By: Atharva Phadnis (Class 8C) · Vimala Kulkarni Memorial School<br>
-Tech Stack: Arduino C++ · SPI / I²C Protocols · U8g2 · SD Library · Python (Pandas/Matplotlib) / MIT App Inventor<br>
+
 Built with curiosity, precision, and a passion for environmental science.<br>
-© 2026 AESR Project · All rights reserved.<br>
+
